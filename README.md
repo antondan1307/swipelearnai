@@ -153,6 +153,14 @@ swipelearn-ai/
    ```
    Vercel will automatically build and deploy your application.
 
+#### Continuous Deployment with GitHub Actions
+
+This repository includes a workflow at `.github/workflows/vercel-prod.yml` that
+deploys to Vercel whenever changes are pushed to the `main` branch. To use it,
+add `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as repository
+secrets on GitHub. After pushing to `main`, a production deployment will appear
+in your Vercel dashboard so you can use **Visit Preview** to view the site.
+
 ### Manual Deployment
 
 ```bash
