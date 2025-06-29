@@ -1,0 +1,27 @@
+{
+  "name": "SwipeLearn AI - Học từ vựng thông minh | Smart Vocabulary Learning",
+  "short_name": "SwipeLearn AI",
+  "description": "Học từ vựng tiếng Anh với flashcard video AI, lộ trình học tập cá nhân hóa và trải nghiệm gamification. Learn English vocabulary with AI-powered video flashcards, personalized learning paths, and gamified experience.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8B5CF6",
+  "orientation": "portrait-primary",
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "dir": "ltr"
+}
