@@ -3,7 +3,7 @@
   "outputDirectory": "out",
   "framework": "nextjs",
   "functions": {
-    "app/api/*/route.ts": {
+    "app/api/**/route.ts": {
       "runtime": "nodejs18.x"
     }
   },
