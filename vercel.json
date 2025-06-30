@@ -8,7 +8,7 @@
     }
   },
   "env": {
-    "OPENAI_API_KEY": "@openai-api-key",
+    "PERPLEXITY_API_KEY": "@perplexity-api-key",
     "NEXT_PUBLIC_FIREBASE_API_KEY": "@firebase-api-key",
     "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": "@firebase-auth-domain",
     "NEXT_PUBLIC_FIREBASE_PROJECT_ID": "@firebase-project-id",

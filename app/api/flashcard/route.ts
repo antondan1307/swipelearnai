@@ -1,59 +1,70 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(request: NextRequest) {
   try {
     const { videoUrl, transcript, difficulty = 'intermediate', topic = '', customPrompt = '' } = await request.json();
 
     if (!transcript) {
-      return NextResponse.json({ error: 'Transcript is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Transcript is required | Cần có transcript' }, { status: 400 });
     }
 
-    // Create a prompt for flashcard generation
-    const systemPrompt = `You are an expert English language tutor specializing in creating effective flashcards for vocabulary learning. 
+    // Create a prompt for flashcard generation using Perplexity
+    const systemPrompt = `Bạn là một chuyên gia dạy tiếng Anh chuyên tạo flashcard hiệu quả để học từ vựng.
 
-Your task is to analyze the provided transcript and create engaging flashcards that help students learn English vocabulary, phrases, and concepts.
+Nhiệm vụ của bạn là phân tích transcript được cung cấp và tạo ra các flashcard hấp dẫn giúp học sinh học từ vựng, cụm từ và khái niệm tiếng Anh.
 
-Guidelines:
-- Create 5-8 flashcards per transcript
-- Focus on vocabulary, phrases, idioms, and key concepts
-- Make questions clear and educational
-- Provide comprehensive answers with context and examples
-- Adjust difficulty based on the specified level: ${difficulty}
-- Include pronunciation tips when relevant
-- Add usage examples in different contexts
+Hướng dẫn:
+- Tạo 5-8 flashcard cho mỗi transcript
+- Tập trung vào từ vựng, cụm từ, thành ngữ và khái niệm chính
+- Làm cho câu hỏi rõ ràng và có tính giáo dục
+- Cung cấp câu trả lời toàn diện với ngữ cảnh và ví dụ
+- Điều chỉnh độ khó dựa trên cấp độ được chỉ định: ${difficulty}
+- Bao gồm mẹo phát âm khi có liên quan
+- Thêm ví dụ sử dụng trong các ngữ cảnh khác nhau
+- Sử dụng song ngữ Việt-Anh để giúp người học Việt Nam hiểu rõ hơn
 
-${topic ? `Special focus area: ${topic}` : ''}
-${customPrompt ? `Additional instructions: ${customPrompt}` : ''}
+${topic ? `Lĩnh vực trọng tâm: ${topic}` : ''}
+${customPrompt ? `Hướng dẫn bổ sung: ${customPrompt}` : ''}
 
-Format your response as a JSON array of flashcard objects with the following structure:
+Định dạng phản hồi của bạn dưới dạng mảng JSON của các đối tượng flashcard với cấu trúc sau:
 {
-  "question": "What does [word/phrase] mean?",
-  "answer": "Detailed explanation with examples and context",
+  "question": "Từ/cụm từ [word/phrase] có nghĩa là gì? | What does [word/phrase] mean?",
+  "answer": "Giải thích chi tiết với ví dụ và ngữ cảnh bằng tiếng Việt và tiếng Anh | Detailed explanation with examples and context in Vietnamese and English",
   "difficulty": "easy|medium|hard",
   "category": "vocabulary|grammar|pronunciation|idioms"
 }`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: `Please create flashcards from this transcript:\n\n${transcript}` }
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-sonar-small-128k-online',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Vui lòng tạo flashcard từ transcript này:\n\n${transcript}` }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
+      }),
     });
+
+    if (!response.ok) {
+      console.error('Perplexity API error:', response.status, response.statusText);
+      return NextResponse.json({ error: 'Failed to generate flashcards | Không thể tạo flashcard' }, { status: 500 });
+    }
+
+    const data = await response.json();
+    const content = data.choices[0]?.message?.content || '[]';
 
     let flashcards;
     try {
-      flashcards = JSON.parse(completion.choices[0].message.content || '[]');
+      flashcards = JSON.parse(content);
     } catch (parseError) {
-      console.error('Failed to parse OpenAI response:', parseError);
-      return NextResponse.json({ error: 'Failed to generate flashcards' }, { status: 500 });
+      console.error('Failed to parse Perplexity response:', parseError);
+      return NextResponse.json({ error: 'Failed to generate flashcards | Không thể tạo flashcard' }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -63,14 +74,15 @@ Format your response as a JSON array of flashcard objects with the following str
         difficulty,
         topic,
         generatedAt: new Date().toISOString(),
-        wordCount: transcript.split(' ').length
+        wordCount: transcript.split(' ').length,
+        provider: 'Perplexity AI'
       }
     });
 
   } catch (error) {
     console.error('Error generating flashcards:', error);
     return NextResponse.json(
-      { error: 'Failed to generate flashcards' },
+      { error: 'Failed to generate flashcards | Không thể tạo flashcard' },
       { status: 500 }
     );
   }

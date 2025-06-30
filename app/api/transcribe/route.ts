@@ -1,9 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,41 +6,27 @@ export async function POST(request: NextRequest) {
     const audioFile = formData.get('audio') as File;
 
     if (!audioFile) {
-      return NextResponse.json({ error: 'Audio file is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Audio file is required | Cần có file âm thanh' }, { status: 400 });
     }
 
-    // Check file size (25MB limit for Whisper)
+    // Check file size (25MB limit)
     if (audioFile.size > 25 * 1024 * 1024) {
-      return NextResponse.json({ error: 'File too large. Maximum size is 25MB.' }, { status: 400 });
+      return NextResponse.json({ error: 'File too large. Maximum size is 25MB. | File quá lớn. Kích thước tối đa là 25MB.' }, { status: 400 });
     }
 
-    // Transcribe audio using Whisper
-    const transcription = await openai.audio.transcriptions.create({
-      file: audioFile,
-      model: "whisper-1",
-      language: "en", // Specify English for better accuracy
-      response_format: "verbose_json",
-      temperature: 0.2, // Lower temperature for more accurate transcription
-    });
-
-    // Extract transcript segments with timestamps
-    const segments = transcription.segments?.map(segment => ({
-      start: segment.start,
-      end: segment.end,
-      text: segment.text.trim()
-    })) || [];
+    // Note: Perplexity doesn't support audio transcription
+    // We need to use a different service or implement a fallback
+    // For now, we'll return a mock response or suggest using OpenAI Whisper
 
     return NextResponse.json({
-      transcript: transcription.text,
-      segments,
-      duration: transcription.duration,
-      language: transcription.language,
-    });
+      error: 'Audio transcription not available with Perplexity API. Please use OpenAI Whisper or another transcription service. | Chuyển đổi âm thanh không khả dụng với Perplexity API. Vui lòng sử dụng OpenAI Whisper hoặc dịch vụ khác.',
+      suggestion: 'Consider using OpenAI Whisper API for audio transcription | Hãy xem xét sử dụng OpenAI Whisper API để chuyển đổi âm thanh'
+    }, { status: 501 });
 
   } catch (error) {
     console.error('Error transcribing audio:', error);
     return NextResponse.json(
-      { error: 'Failed to transcribe audio' },
+      { error: 'Failed to transcribe audio | Không thể chuyển đổi âm thanh' },
       { status: 500 }
     );
   }
