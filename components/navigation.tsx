@@ -14,7 +14,8 @@ import {
   Bell,
   Settings,
   Menu,
-  X
+  X,
+  Key
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -25,6 +26,7 @@ interface NavigationProps {
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState(3);
+  const [hasApiKey, setHasApiKey] = useState(false);
 
   const navItems = [
     { id: 'home', label: 'Trang chủ', labelEn: 'Home', icon: Home },
@@ -42,14 +44,46 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
       }
     };
 
+    // Check if API key is configured
+    const checkApiKey = async () => {
+      try {
+        const response = await fetch('/api/flashcard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transcript: 'test' }),
+        });
+        setHasApiKey(response.status !== 500);
+      } catch {
+        setHasApiKey(false);
+      }
+    };
+
     window.addEventListener('resize', handleResize);
+    checkApiKey();
+    
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return (
     <>
+      {/* API Key Warning */}
+      {!hasApiKey && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-500 text-white text-center py-2 text-sm">
+          <span className="mr-2">⚠️ Cần thiết lập API key để sử dụng đầy đủ tính năng</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-yellow-600 ml-2"
+            onClick={() => window.open('/setup', '_blank')}
+          >
+            <Key className="w-4 h-4 mr-1" />
+            Thiết lập
+          </Button>
+        </div>
+      )}
+
       {/* Desktop Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200 dark:bg-gray-900/80 dark:border-gray-700">
+      <nav className={`fixed ${!hasApiKey ? 'top-10' : 'top-0'} left-0 right-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200 dark:bg-gray-900/80 dark:border-gray-700`}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -94,6 +128,16 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
 
             {/* Right Side Actions */}
             <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden md:flex"
+                onClick={() => window.open('/setup', '_blank')}
+              >
+                <Key className="w-4 h-4 mr-2" />
+                Setup
+              </Button>
+              
               <Button variant="ghost" size="sm" className="relative hidden md:flex">
                 <Bell className="w-4 h-4" />
                 {notifications > 0 && (
@@ -152,13 +196,29 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
                   </Button>
                 ))}
               </div>
+              
+              {/* Mobile Setup Button */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    window.open('/setup', '_blank');
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <Key className="w-4 h-4 mr-2" />
+                  Thiết lập API Keys | Setup API Keys
+                </Button>
+              </div>
             </div>
           </motion.div>
         )}
       </nav>
 
       {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-t border-gray-200 dark:bg-gray-900/90 dark:border-gray-700 md:hidden">
+      <div className={`fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-t border-gray-200 dark:bg-gray-900/90 dark:border-gray-700 md:hidden`}>
         <div className="flex items-center justify-around py-2">
           {navItems.slice(0, 5).map((item) => (
             <Button
