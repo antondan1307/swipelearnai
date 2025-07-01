@@ -116,8 +116,9 @@ export default function HomePage() {
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"
-          />
+          >
+            <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4" />
+          </motion.div>
           <p className="text-lg font-medium text-gray-600">
             Đang tải SwipeLearn AI... | Loading SwipeLearn AI...
           </p>
