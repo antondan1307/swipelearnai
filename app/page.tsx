@@ -230,8 +230,8 @@ export default function HomePage() {
                         <span className="text-base text-gray-600 font-normal">{feature.title}</span>
                       </CardTitle>
                       <CardDescription className="space-y-1">
-                        <div>{feature.descriptionVi}</div>
-                        <div className="text-xs text-gray-500">{feature.description}</div>
+                        <span className="block">{feature.descriptionVi}</span>
+                        <span className="block text-xs text-gray-500">{feature.description}</span>
                       </CardDescription>
                     </CardHeader>
                   </Card>
